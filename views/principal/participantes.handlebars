@@ -1,0 +1,19 @@
+<h2>Lista de participantes: </h2>
+<hr>
+<a href="/"><button class="btn btn-success">Novo participante</button></a><br>
+<button class="btn btn-danger mt-2">Sortear!</button>
+{{#each participantes}}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>Nome: {{nome}} </h4>
+            <h4>E-mail:{{email}}</h4>
+            <a href="/participantes/edit/{{_id}}"><button class="btn btn-success mt-2">Editar participante</button></a>
+            <form action="/participantes/deletar" method="POST">
+                <input type="hidden" name="id" value="{{_id}}">
+                <button types="submit" class="btn btn-danger mt-2">Deletar participante</button>
+            </form>
+        </div>
+    </div>
+{{else}}
+    <h4 class="mt-3">Nenhum participante registrada!</h4>
+{{/each}}
