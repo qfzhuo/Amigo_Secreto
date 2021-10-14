@@ -30,8 +30,9 @@ const flash = require("connect-flash")
     app.engine('handlebars', handlebars({defaultLayout: "main"}))
     app.set('view engine', 'handlebars')
     //Mongoose
+    //Por favor, criar um banco de dados com nome "amigosecreto" com MongoDB local para rodar o programa
     Mongoose.Promise = global.Promise;
-    Mongoose.connect("mongodb+srv://amigo:secreto@cluster0.ljon7.mongodb.net/AmigoSecreto?retryWrites=true&w=majority", {useNewUrlParser: true, useUnifiedTopology: true}).then(() => {
+    Mongoose.connect("mongodb://localhost/amigosecreto", {useNewUrlParser: true, useUnifiedTopology: true}).then(() => {
         console.log("Conectado ao mongo")    
     }).catch((err) => {
         console.log("Erro ao se conectar"+err) 

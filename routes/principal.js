@@ -1,4 +1,5 @@
 const express = require('express')
+const nodemailer = require('nodemailer')
 const router = express.Router()
 const mongoose = require("mongoose")
 require("../models/Participante")
@@ -66,14 +67,88 @@ router.post("/participantes/deletar", (req, res) => {
         req.flash("success_msg", "Participante deletado com sucesso!")
         res.redirect("/participantes")
     }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao deletar o participante"+err)
+        req.flash("error_msg", "Houve um erro ao deletar o participante "+err)
         res.redirect("/participantes")
     })
 })
 
 router.get("/participantes/sortear", (req, res) => { 
-    let group = Participante.find({_id:req.params.id})
-    console.log("oi "+group)
+    Participante.find().then(function(amigos) { 
+    var amigos_sorteados = amigos.slice()
+    if (amigos.length <= 2){
+        req.flash("error_msg", "Participantes insuficiente para o amigo secreto")
+        res.redirect("/participantes")
+    } 
+    else {
+        function shuffle(array){
+            var indice_atual = array.length, valor_temporario, indice_aleatorio
+
+            while (0 != indice_atual) {
+                indice_aleatorio = Math.floor(Math.random() * indice_atual)
+                indice_atual -= 1
+
+                valor_temporario = array[indice_atual]
+                array[indice_atual] = array[indice_aleatorio]
+                array[indice_aleatorio] = valor_temporario
+            }
+            return array
+        }
+        repete_sorteio = true
+        var cont = 0
+        while (repete_sorteio) {
+            if (cont==amigos.length){
+                repete_sorteio = false
+            } else {
+                repete_sorteio = true
+                amigos_sorteados = shuffle(amigos_sorteados)
+                cont = 0
+                for (contv=0; contv<amigos.length; contv++){
+                    if (amigos[contv] !== amigos_sorteados[contv]){
+                        cont++
+                    } else {
+                        cont = 0
+                    }
+                }
+            }
+        }
+        for (let j=0; j<amigos.length; j++){
+            let pessoa = amigos[j].nome
+            let email_pessoa = amigos[j].email
+            let amigosecreto = amigos_sorteados[j].nome
+
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.ethereal.email',
+                port: 587,
+                auth: {
+                    user: 'yk5pz2dlgdhlxqul@ethereal.email',
+                    pass: 'KcUR3esJs5JUNjB7nn'
+                }
+            });
+
+            var message = {
+                from: "yk5pz2dlgdhlxqul@ethereal.email",
+                to: email_pessoa,
+                subject: "Amigo Secreto",
+                text: pessoa + ", seu amigo secreto é " + amigosecreto
+            };
+            transporter.sendMail(message, function(err){
+                if (err) {
+                    req.flash("error_msg", "Erro ao encaminhar os emails" + err)
+                    res.redirect("/participantes")
+                }
+                else {
+                    req.flash("success_msg", "Sorteio e envio de emails concluídos, verifique sua caixa de entrada")
+                    res.redirect("/participantes") 
+                }
+            })
+            
+        }
+    }
+    })
 })
+        
+      
+      
+
 
 module.exports = router
